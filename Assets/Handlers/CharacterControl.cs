@@ -29,6 +29,7 @@ public class CharacterControl : MonoBehaviour
         rb.velocity = UpdateDirection(StaticPlayerInput.Input.Player.Move.ReadValue<Vector2>());
 
         rb.rotation = UpdateRotation(StaticPlayerInput.Input.Player.Look.ReadValue<Vector2>());
+
     }
 
     private Quaternion UpdateRotation(Vector2 input)
@@ -69,7 +70,7 @@ public class CharacterControl : MonoBehaviour
 
     private void Jump(InputAction.CallbackContext ctx)
     {
-        if (grounded)
+        if (Physics.Raycast(rb.transform.position, Vector3.down, 1f))
         {
             Debug.Log("jump");
             rb.AddForce(Vector3.up * jumpStrength);
