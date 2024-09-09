@@ -1,3 +1,5 @@
+using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -5,6 +7,9 @@ public class CharacterControl : MonoBehaviour
 {
     [SerializeField] int speed = 50;
     [SerializeField] int jumpStrength = 5;
+    [SerializeField] float sensitivity = 10;
+
+    [SerializeField] Transform lookAt;
 
     Rigidbody rb;
     bool grounded = true;
@@ -14,12 +19,30 @@ public class CharacterControl : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         StaticPlayerInput.Input.Player.Enable();
         StaticPlayerInput.Input.Player.Jump.performed += Jump;
+        StaticPlayerInput.Input.Player.Pause.performed += Pause;
+
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void FixedUpdate()
     {
         rb.velocity = UpdateDirection(StaticPlayerInput.Input.Player.Move.ReadValue<Vector2>());
+
+        rb.rotation = UpdateRotation(StaticPlayerInput.Input.Player.Look.ReadValue<Vector2>());
     }
+
+    private Quaternion UpdateRotation(Vector2 input)
+    {
+        input.Normalize();
+
+        /*float newLook = Mathf.Clamp(lookAt.localPosition.y + input.y *.5f, 0f, 2f);
+        lookAt.localPosition = new Vector3(0, newLook, .5f);*/
+
+        return Quaternion.Lerp(rb.rotation, Quaternion.Euler(0, rb.rotation.eulerAngles.y + input.x*sensitivity, 0), .9f);
+
+            
+    }
+
     private Vector3 UpdateDirection(Vector2 input)
     { 
         Vector3 newDirection = CameraDirectionMovement(input, Camera.main);
@@ -51,5 +74,13 @@ public class CharacterControl : MonoBehaviour
             Debug.Log("jump");
             rb.AddForce(Vector3.up * jumpStrength);
         }
+    }
+
+    private void Pause(InputAction.CallbackContext ctx)
+    {
+        if (Cursor.lockState == CursorLockMode.Locked)
+            Cursor.lockState = CursorLockMode.None;
+        else
+            Cursor.lockState = CursorLockMode.Locked;
     }
 }
