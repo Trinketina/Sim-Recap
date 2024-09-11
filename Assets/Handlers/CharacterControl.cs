@@ -28,24 +28,12 @@ public class CharacterControl : MonoBehaviour
     private void FixedUpdate()
     {
         rb.velocity = UpdateDirection(StaticPlayerInput.Input.Player.Move.ReadValue<Vector2>());
-        /*float speed = Math.Abs(rb.velocity.x) + Math.Abs(rb.velocity.z);
-        characterAnim.SetFloat("Speed", speed);*/
-
-        /*rb.rotation = UpdateRotation(StaticPlayerInput.Input.Player.Look.ReadValue<Vector2>(), rb.rotation);*/
         lookAt.rotation = UpdateRotation(StaticPlayerInput.Input.Player.Look.ReadValue<Vector2>(), lookAt.rotation);
-        /*if (characterAnim.GetFloat("Speed") > 0)
-        {
-            rb.rotation = lookAt.rotation;
-            lookAt.localRotation = Quaternion.Euler(0,0,0);
-        }*/
     }
 
     private Quaternion UpdateRotation(Vector2 input, Quaternion rotator)
     {
         input.Normalize();
-
-        /*float newLook = Mathf.Clamp(lookAt.localPosition.y + input.y *.5f, 0f, 2f);
-        lookAt.localPosition = new Vector3(0, newLook, .5f);*/
 
         return Quaternion.Lerp(rotator, Quaternion.Euler(0, rotator.eulerAngles.y + input.x*sensitivity, 0), .9f);
 
