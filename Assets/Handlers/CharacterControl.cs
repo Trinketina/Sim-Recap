@@ -10,9 +10,10 @@ public class CharacterControl : MonoBehaviour
     [SerializeField] float sensitivity = 10;
 
     [SerializeField] Transform lookAt;
+    [SerializeField] Animator characterAnim;
 
     Rigidbody rb;
-    bool grounded = true;
+    bool grounded;
 
     private void Start()
     {
@@ -23,13 +24,11 @@ public class CharacterControl : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
     }
-
     private void FixedUpdate()
     {
         rb.velocity = UpdateDirection(StaticPlayerInput.Input.Player.Move.ReadValue<Vector2>());
-
+        characterAnim.SetFloat("Speed", Math.Abs(rb.velocity.x) + Math.Abs(rb.velocity.z));
         rb.rotation = UpdateRotation(StaticPlayerInput.Input.Player.Look.ReadValue<Vector2>());
-
     }
 
     private Quaternion UpdateRotation(Vector2 input)
@@ -70,9 +69,11 @@ public class CharacterControl : MonoBehaviour
 
     private void Jump(InputAction.CallbackContext ctx)
     {
-        if (Physics.Raycast(rb.transform.position, Vector3.down, 1f))
+        if (grounded || Physics.Raycast(rb.transform.position, Vector3.down, 1))
         {
-            Debug.Log("jump");
+            characterAnim.SetTrigger("Jump");
+            grounded = false;
+            characterAnim.SetBool("Grounded", grounded);
             rb.AddForce(Vector3.up * jumpStrength);
         }
     }
@@ -83,5 +84,15 @@ public class CharacterControl : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
         else
             Cursor.lockState = CursorLockMode.Locked;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.layer == 6)
+        {
+            grounded = true;
+            characterAnim.SetBool("Grounded", grounded);
+        }
+
     }
 }
